@@ -117,7 +117,14 @@ namespace ace
             }
             return retVal;
         }
-
+        public static string PopUpFlag()
+        {
+            return SessionObject.Get("DownloadCompleted").ToString();
+        }
+        public static void SetPopUpFlag()
+        {
+            SessionObject.Set("DownloadCompleted", "False");
+        }
         public static void AdmindeclineProposalCallStatus()
         {
             SessionObject.Set("PendingList", "1");

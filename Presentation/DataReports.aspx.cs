@@ -39,7 +39,9 @@ namespace Bancassurance.Presentation
 				this.txtDATETO.Text   = sysDate.Day + "/" + sysDate.Month + "/" + sysDate.Year;
 			    BindBranches();
 				BindStatus();
-			}
+                Session["PageReloadTime"] = 1000;
+                SessionObject.Set("DownloadCompleted","False");
+            }
 
             //SetDownloadLink(hlbanca,ConfigurationSettings.AppSettings["downloadBancaName"],ConfigurationSettings.AppSettings["prototypeBancaFilePath"],GenerateFileType.Banca.ToString());
 			//SetDownloadLink(hlIlasile,ConfigurationSettings.AppSettings["downloadIlasName"],ConfigurationSettings.AppSettings["prototypeIlasFilePath"],GenerateFileType.Ilas.ToString());
@@ -84,19 +86,38 @@ namespace Bancassurance.Presentation
 			}
 			else
 			{
-				hlcrtl.Enabled=true;
-				hlcrtl.NavigateUrl=downloadProposalFile;
+				//hlcrtl.Enabled=true;
+				//hlcrtl.NavigateUrl=downloadProposalFile;
 
-				Response.Clear();
-				Response.ContentType = "Application/.xls";
-				Response.AppendHeader("Content-Disposition", "attachment; filename="+FileName+"");
-				//Response.TransmitFile(downloadProposalFile);
-				Response.WriteFile(downloadProposalFile); 
-				Response.Flush();
-				DeleteFile(downloadProposalFile);
-				Response.End();
+				//Response.Clear();
+				//Response.ContentType = "Application/.xls";
+				//Response.AppendHeader("Content-Disposition", "attachment; filename="+FileName+"");
+				////Response.TransmitFile(downloadProposalFile);
+				//Response.WriteFile(downloadProposalFile); 
+				//Response.Flush();
+				//DeleteFile(downloadProposalFile);
+				//Response.End();
+                try
+                {
+                    hlcrtl.Enabled = true;
+                    hlcrtl.NavigateUrl = downloadProposalFile;
 
-			}
+                    Response.Clear();
+                    Response.ContentType = "Application/.xls";
+                    Response.AppendHeader("Content-Disposition", "attachment; filename=" + FileName + "");
+                    //Response.TransmitFile(downloadProposalFile);
+                    Response.WriteFile(downloadProposalFile);
+                    Response.Flush();
+                    DeleteFile(downloadProposalFile);
+                    SessionObject.Set("DownloadCompleted", "True");
+                    Response.End();
+                }
+                catch (Exception)
+                {
+
+                }
+
+            }
 			
 		}
 
@@ -853,6 +874,10 @@ namespace Bancassurance.Presentation
 
 		private void WriteTextFile(DataTable dt)
 		{
+            try
+            {
+
+           
 			string attachment = "attachment; filename=ExportProposalList.txt";
 			HttpContext.Current.Response.Clear();
 			HttpContext.Current.Response.ClearHeaders();
@@ -896,7 +921,12 @@ namespace Bancassurance.Presentation
 			HttpContext.Current.Response.Write(exportData(dt));
 
 			HttpContext.Current.Response.End();
-		}
+            }
+            catch (Exception)
+            {
+                SessionObject.Set("DownloadCompleted", "True");
+            }
+        }
 
 		private string exportData(DataTable dt)
 		{			

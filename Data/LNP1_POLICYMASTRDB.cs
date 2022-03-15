@@ -1337,7 +1337,7 @@ vw.np2_commendate CommencementDate  , vw.npr_maturitydate  MaturityDate  ,
             " where c.CM_Action = 'T'\n" +
             user_con +
             "--and to_char(c.cm_commentdate,'dd/MM/yyyy') between '"+ FromDate + "' and '"+ ToDate + "'\n" +
-            "and c.cm_commentdate BETWEEN TO_DATE('" + FromDate + "','dd/MM/yyyy') AND TO_DATE('" + ToDate + "','dd/MM/yyyy')\n" +
+            "and trunc(c.cm_commentdate) BETWEEN TO_DATE('" + FromDate + "','dd/MM/yyyy') AND TO_DATE('" + ToDate + "','dd/MM/yyyy')\n" +
             " and c.cm_serial_no=(Select Max(cm_serial_no) from lncm_comments cm where cm.np1_proposal=c.np1_proposal)\n" +
             " group by c.NP1_PROPOSAL,\n" +
             "           c.cm_commentby,\n" +

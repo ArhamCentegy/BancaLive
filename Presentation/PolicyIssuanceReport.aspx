@@ -14,6 +14,12 @@
 		<meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
 		<script type="text/JavaScript" src="../shmalib/jscript/Login.js"></script>
 		<SCRIPT language="JavaScript" src="../shmalib/jscript/WebUIValidation.js"></SCRIPT>
+        <script type="text/JavaScript" language="JavaScript" src="../shmalib/jscript/WebUIValidation.js"></script>
+        <script type="text/JavaScript" language="javascript" src="JSFiles/JScriptFG.js"></script>
+		<script type="text/JavaScript" language="javascript" src="JSFiles/msrsclient.js"></script>
+        <script type="text/JavaScript" language="javascript" src="JSFiles/PortableSQL.js"></script>
+        <script type="text/JavaScript" language="javascript" src="JSFiles/NumberFormat.js"></script>
+        <script type="text/JavaScript" language="javascript" src="../shmalib/jscript/MI_UI_Messaging.js"></script>
 		<!-- <LINK rel="stylesheet" type="text/css" href="Styles/Style.css"> -->
 		<%Response.Write(ace.Ace_General.loadInnerStyle());%>
 		<asp:literal id="HeaderScript" EnableViewState="True" runat="server"></asp:literal>
@@ -24,6 +30,9 @@
 			</tr>
 		</table>
 		<form id="myForm1" method="post" name="myForm1" runat="server">
+              <DIV class="divWaiting" id="divProcessing" style="LEFT: 10px; WIDTH: 97%; VISIBILITY: hidden; POSITION: absolute; TOP: 118px; HEIGHT: 22px">
+                Please wait ... {0}
+             </DIV>
 			<div style="Z-INDEX: 101" id="NormalEntryTableDiv" runat="server">
 				<P><LEGEND style="COLOR: #336692"></LEGEND></P>
 				<TABLE id="entryTable" border="0" cellSpacing="5" cellPadding="1" width="100%">
@@ -61,7 +70,7 @@
 						<TD>
 							<a href="#" class="button2" onclick="saveUpdate('btnGenerateExcel');">&nbsp;&nbsp;Generate 
 								Report &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
-							<asp:button id="btnGenerateExcel" runat="server" Width="0px" Text="Generate MIS Text File" Font-Bold="True" onclick="btnGenerateExcel_Click"></asp:button>
+							<asp:button id="btnGenerateExcel" runat="server" Width="0px" Text="Generate MIS Text File" Font-Bold="True" onclick="btnGenerateExcel_Click" OnClientClick="DownloadFiles();" ></asp:button>
 						</TD>
 					</TR>
 					<TR id="rowUCN_DEFAULT" class="TRow_Alt">
@@ -122,9 +131,26 @@
 	      window.location.replace( "UploadedFiles/downloadProposalIlas.xls" );
 	    }
 	    function saveUpdate(ButtonId)
-		{
+        {
+            openWait('Report Generating');
 			 document.all(ButtonId).click();
 		}
 		</script>
+         <script type="text/javascript" language="javascript">
+             var ReloadTimeCounter = 2;
+             var reloadTime = '<%= Session["PageReloadTime"] %>';
+             function DownloadFiles() {
+                 var DownloadCompleted = executeClass('ace.Ace_General,PopUpFlag');
+                 if (DownloadCompleted == "True") {
+                     DownloadCompleted = executeClass('ace.Ace_General,SetPopUpFlag');
+                     closeWait();
+                     return;
+                 }
+                 else {
+                     reloadTime = ReloadTimeCounter * Number(reloadTime);
+                 }
+                 window.setTimeout("DownloadFiles()", Number(reloadTime));
+             }
+        </script>
 	</BODY>
 </HTML>

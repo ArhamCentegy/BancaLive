@@ -14,6 +14,10 @@
 		<meta name="vs_targetSchema" content="http://schemas.microsoft.com/intellisense/ie5">
 		<script type="text/JavaScript" src="../shmalib/jscript/Login.js"></script>
 		<SCRIPT language="JavaScript" src="../shmalib/jscript/WebUIValidation.js"></SCRIPT>
+         <script type="text/JavaScript" language="javascript" src="JSFiles/JScriptFG.js"></script>
+		<script type="text/JavaScript" language="javascript" src="JSFiles/msrsclient.js"></script>
+        <script type="text/JavaScript" language="javascript" src="../shmalib/jscript/MI_UI_Messaging.js"></script>
+		
 		<!-- <LINK rel="stylesheet" type="text/css" href="Styles/Style.css"> -->
 		<%Response.Write(ace.Ace_General.loadInnerStyle());%>
 		<asp:literal id="HeaderScript" EnableViewState="True" runat="server"></asp:literal>
@@ -24,6 +28,9 @@
 			</tr>
 		</table>
 		<form id="myForm1" method="post" name="myForm1" runat="server">
+            <DIV class="divWaiting" id="divProcessing" style="LEFT: 10px; WIDTH: 97%; VISIBILITY: hidden; POSITION: absolute; TOP: 118px; HEIGHT: 22px">
+                Please wait ... {0}
+            </DIV>
 			<div style="Z-INDEX: 101" id="NormalEntryTableDiv" runat="server">
 				<P><LEGEND style="COLOR: #336692"></LEGEND></P>
 				<TABLE id="entryTable" border="0" cellSpacing="5" cellPadding="1" width="100%">
@@ -70,7 +77,7 @@
 						</TD>
 						<TD><a href="#" class="button2" onclick="saveUpdate('btngeneratebanc');">&nbsp;&nbsp;Generate 
 								Banassurance File&nbsp;&nbsp;</a><asp:button id="btngeneratebanc" runat="server" Width="0px" Text="Generate Banassurance File"
-								Font-Bold="True" BackColor="InactiveBorder" onclick="btngeneratebanc_Click"></asp:button></TD>
+								Font-Bold="True" BackColor="InactiveBorder" onclick="btngeneratebanc_Click" OnClientClick="DownloadFiles()" ></asp:button></TD>
 						<TD></TD>
 					</TR>
 					<TR class="TRow_Alt">
@@ -80,7 +87,7 @@
 						<TD><a href="#" class="button2" onclick="saveUpdate('btngeneratebank');">&nbsp;&nbsp;Generate 
 								Bank 
 								File&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><asp:button id="btngeneratebank" runat="server" Width="0px" Text="Generate UBL File" Font-Bold="True"
-								BackColor="InactiveBorder" onclick="btngeneratebank_Click"></asp:button></TD>
+								BackColor="InactiveBorder" onclick="btngeneratebank_Click" OnClientClick="DownloadFiles()" ></asp:button></TD>
 						<TD></TD>
 					</TR>
 					<TR>
@@ -90,7 +97,7 @@
 						<TD><a href="#" class="button2" onclick="saveUpdate('btngenerateilasfile');">&nbsp;&nbsp;Generate 
 								ILAS 
 								File&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><asp:button style="Z-INDEX: 0" id="btngenerateilasfile" runat="server" Width="0px" Text="Generate ILAS File"
-								Font-Bold="True" BackColor="InactiveBorder" onclick="btngenerateilasfile_Click"></asp:button>&nbsp;</TD>
+								Font-Bold="True" BackColor="InactiveBorder" onclick="btngenerateilasfile_Click" OnClientClick="DownloadFiles()"></asp:button>&nbsp;</TD>
 					</TR>
 					<TR>
 						<TD style="WIDTH: 194px">
@@ -100,7 +107,7 @@
 						<TD><a href="#" class="button2" onclick="saveUpdate('btngeneratedatadumpfile');"> &nbsp;&nbsp;Generate 
 								Data Dump File&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
 							<asp:button style="Z-INDEX: 0" id="btngeneratedatadumpfile" runat="server" Width="0px" Text="Generate Data Dump File"
-								Font-Bold="True" BackColor="InactiveBorder" onclick="btngeneratedatadumpfile_Click"></asp:button></TD>
+								Font-Bold="True" BackColor="InactiveBorder" onclick="btngeneratedatadumpfile_Click" OnClientClick="DownloadFiles()"></asp:button></TD>
 					</TR>
 										<tr>
 						<TD></TD>
@@ -123,14 +130,14 @@
 						<TD><a href="#" class="button2" onclick="saveUpdate('btngenerateIlasMisfile');">&nbsp;&nbsp;Generate 
 								ILAS MIS File &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
 							<asp:button style="Z-INDEX: 0" id="btngenerateIlasMisfile" runat="server" Width="0px" Text="Generate ILAS MIS File"
-								Font-Bold="True" BackColor="InactiveBorder" onclick="btngenerateIlasMisfile_Click"></asp:button></TD>
+								Font-Bold="True" BackColor="InactiveBorder" onclick="btngenerateIlasMisfile_Click" OnClientClick="DownloadFiles()"></asp:button></TD>
 					</TR>
 					<TR>
 						<TD style="WIDTH: 194px; HEIGHT: 25px"></TD>
 						<TD>
 							<a href="#" class="button2" onclick="saveUpdate('btnTextFile');">&nbsp;&nbsp;Generate 
 								MIS Text File &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
-							<asp:button id="btnTextFile" runat="server" Width="0px" Text="Generate MIS Text File" Font-Bold="True" onclick="btnTextFile_Click"></asp:button>
+							<asp:button id="btnTextFile" runat="server" Width="0px" Text="Generate MIS Text File" Font-Bold="True" onclick="btnTextFile_Click" OnClientClick="DownloadFiles()"></asp:button>
 						</TD>
 					</TR>
 					<TR id="rowUCN_DEFAULT" class="TRow_Alt">
@@ -191,9 +198,38 @@
 	      window.location.replace( "UploadedFiles/downloadProposalIlas.xls" );
 	    }
 	    function saveUpdate(ButtonId)
-		{
+        {
+            openWait("Generating Report");
 			 document.all(ButtonId).click();
 		}
 		</script>
+        <script type="text/javascript" language="javascript">
+            var ReloadTimeCounter = 1;
+            var reloadTime = '<%= Session["PageReloadTime"] %>';
+            function DownloadFiles() {
+                var DownloadCompleted = executeClass('ace.Ace_General,PopUpFlag');
+                if (DownloadCompleted == "True") {
+                    DownloadCompleted = executeClass('ace.Ace_General,SetPopUpFlag');
+                    closeWait();
+                    return;
+                }
+                else {
+                    reloadTime = ReloadTimeCounter * Number(reloadTime);
+                }
+                window.setTimeout("DownloadFiles()", Number(reloadTime));
+            }
+          <%--  var isReload = false;
+            function DownloadFiles() {
+                var reloadTime = '<%= Session["PageReloadTime"] %>';
+                if (isReload == true) {
+                    isReload = false;
+                    window.location.reload();
+                }
+                else {
+                    isReload = true;
+                }
+                window.setTimeout("DownloadFiles()", 9999999);
+            }--%>
+</script>
 	</BODY>
 </HTML>

@@ -38,6 +38,8 @@ namespace Bancassurance.Presentation
                 this.txtDATEFROM.Text = "01/" + sysDate.Month + "/" + sysDate.Year;
                 this.txtDATETO.Text = sysDate.Day + "/" + sysDate.Month + "/" + sysDate.Year;
                 BindUsers();
+                Session["PageReloadTime"] = 1000;
+                SessionObject.Set("DownloadCompleted", "False");
             }
         }
 
@@ -143,6 +145,7 @@ namespace Bancassurance.Presentation
                     }
                     Response.Write("\n");
                 }
+                SessionObject.Set("DownloadCompleted", "True");
                 Response.End();
             }
             catch (Exception)
